@@ -1,0 +1,60 @@
+{
+  "_comment": [
+    "Enhanced Databricks Workflow v2.0 — Enterprise Retail Analytics Platform",
+    "",
+    "HOW TO IMPORT:",
+    "  Databricks UI → Workflows → Create Job → ⋮ (kebab menu) → Import JSON",
+    "  OR via CLI:  databricks jobs create --json @databricks_workflow.json",
+    "",
+    "BEFORE IMPORTING — change these three things:",
+    "  1. Replace WORKSPACE_PATH with your actual notebook folder path",
+    "     e.g.  /Users/you@email.com/capstone",
+    "  2. Set your alert_email if you want failure notifications",
+    "  3. Set pause_status to UNPAUSED when ready to activate the schedule"
+  ],
+  "name": "Enterprise Retail Analytics Platform v2.0 — Daily Pipeline",
+  "tasks": [
+    {
+      "task_key": "orchestrator",
+      "description": "Master orchestrator: data generator → Bronze → Silver → Gold (with RFM, Inventory, Forecast)",
+      "notebook_task": {
+        "notebook_path": "WORKSPACE_PATH/05_orchestrator",
+        "base_parameters": {
+          "orchestration_mode":  "daily_incremental",
+          "run_date":            "",
+          "environment":         "free_edition",
+          "base_data_path":      "",
+          "catalog_name":        "capstone",
+          "pipeline_run_id":     "{{job.run_id}}",
+          "timeout_seconds":     "3600",
+          "dirty_data_ratio":    "0.06",
+          "alert_email":         "",
+          "teams_webhook_url":   "",
+          "max_retries":         "1"
+        },
+        "source": "WORKSPACE"
+      },
+      "timeout_seconds": 7200,
+      "max_retries": 1,
+      "min_retry_interval_millis": 300000,
+      "retry_on_timeout": false
+    }
+  ],
+  "schedule": {
+    "quartz_cron_expression": "0 0 2 * * ?",
+    "timezone_id": "UTC",
+    "pause_status": "PAUSED",
+    "_comment": "Runs at 02:00 UTC daily. Change pause_status to UNPAUSED to activate."
+  },
+  "max_concurrent_runs": 1,
+  "email_notifications": {
+    "on_failure": [],
+    "_comment": "Add your email(s) here as a backup to the in-pipeline alerting"
+  },
+  "tags": {
+    "project":  "capstone-v2",
+    "layer":    "full-pipeline",
+    "version":  "2.0",
+    "owner":    "data-engineering"
+  }
+}
